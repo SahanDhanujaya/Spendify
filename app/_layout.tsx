@@ -1,14 +1,15 @@
+import { Slot } from 'expo-router';
 import React from 'react';
 import { View } from 'react-native';
-import './../global.css';
-import Home from './index';  // ✅ Correct import
-
+// import '../global.css';
+  
 const _layout = () => {
   return (
-    <View>
-      <Home />
+    <View className="flex-1">
+      <Slot/>
+      
     </View>
-  );
-};
+  )
+}
 
 export default _layout;

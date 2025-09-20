@@ -8,7 +8,7 @@ export default function TabLayout() {
   const tabItems = [
     { name: "dashboard", title: "Dashboard", icon: "dashboard" },
     { name: "transactions", title: "Transactions", icon: "receipt-long" },
-    { name: "add-transaction", title: "Add", icon: "add-circle" },
+    { name: "add-transaction", title: "Add", icon: "add-circle-outline" },
     { name: "analytics", title: "Analytics", icon: "analytics" },
     { name: "profile", title: "Profile", icon: "account-circle" }
   ];
@@ -47,7 +47,7 @@ export default function TabLayout() {
               tabBarIcon: ({ color, size, focused }) => (
                 <View className={`items-center justify-center ${
                   tab.name === "add-transaction" 
-                    ? "bg-gray-800 rounded-full p-2 shadow-lg" 
+                    ? "bg-gray-800 rounded-full shadow-lg" 
                     : ""
                 }`}>
                   <MaterialIcons 
@@ -60,7 +60,7 @@ export default function TabLayout() {
               tabBarLabel: tab.name === "add-transaction" ? "" : tab.title,
               ...(tab.name === "add-transaction" && {
                 tabBarIconStyle: {
-                  marginTop: -10,
+                  marginTop: 0,
                 }
               })
             }}

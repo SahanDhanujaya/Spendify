@@ -1,7 +1,7 @@
 import { Slot } from 'expo-router';
 import React from 'react';
 import { View } from 'react-native';
-// import '../global.css';
+import '../global.css';
   
 const _layout = () => {
   return (

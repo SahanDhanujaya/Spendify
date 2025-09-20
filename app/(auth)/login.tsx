@@ -21,7 +21,7 @@ const Login: React.FC = () => {
   const router = useRouter();
 
   const handleLogin = () => {
-    router.push("/(dashboard)");
+    router.push("../../(dashboard)/dashboard");
   };
 
   const handleForgotPassword = () => {

@@ -1,7 +1,7 @@
-import { router } from 'expo-router';
 import React, { useState } from 'react';
 import {
     Dimensions,
+    Image,
     SafeAreaView,
     ScrollView,
     StatusBar,
@@ -50,9 +50,6 @@ const Dashboard: React.FC = () => {
     return Math.min((spent / budget) * 100, 100);
   };
 
-    const handleAddTransaction = () => {
-        router.push('/(dashboard)/addTransaction');
-    };
   return (
     <SafeAreaView className="flex-1 bg-gray-50 py-4">
       <StatusBar barStyle="dark-content" backgroundColor="#F9FAFB" />
@@ -65,7 +62,10 @@ const Dashboard: React.FC = () => {
             <Text className="text-gray-500 text-base">Here's your financial overview</Text>
           </View>
           <TouchableOpacity className="bg-white rounded-full p-3 shadow-sm">
-            <Text className="text-2xl">👤</Text>
+            <Image
+            source={require('../../assets/profile/WhatsApp Image 2025-08-28 at 13.37.33_97bcc532.jpg')}
+            className='w-16 h-16 rounded-full'
+            />
           </TouchableOpacity>
         </View>
 
@@ -235,17 +235,6 @@ const Dashboard: React.FC = () => {
           </View>
         </View>
       </ScrollView>
-
-      {/* Bottom Action Button */}
-      <View className="px-6 pb-6">
-        <TouchableOpacity
-        onPress={handleAddTransaction}
-        className="bg-gray-800 rounded-2xl py-4 shadow-lg">
-          <Text className="text-white text-lg font-bold text-center">
-            ➕ Add Transaction
-          </Text>
-        </TouchableOpacity>
-      </View>
     </SafeAreaView>
   );
 };

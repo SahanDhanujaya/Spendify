@@ -1,27 +1,41 @@
+import { login } from "@/services/userService";
 import { useRouter } from "expo-router";
 import React, { useState } from "react";
 import {
-    Image,
-    ImageBackground,
-    KeyboardAvoidingView,
-    Platform,
-    SafeAreaView,
-    ScrollView,
-    StatusBar,
-    Text,
-    TextInput,
-    TouchableOpacity,
-    View
+  Alert,
+  Image,
+  ImageBackground,
+  KeyboardAvoidingView,
+  Platform,
+  SafeAreaView,
+  ScrollView,
+  StatusBar,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View
 } from "react-native";
 
 const Login: React.FC = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [isPasswordVisible, setIsPasswordVisible] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
 
   const handleLogin = () => {
-    router.push("../../(dashboard)/dashboard");
+    setIsLoading(true);
+    login({ email, password })
+      .then(() => {
+        setIsLoading(false);
+        clearFields();
+        Alert.alert("Login Successful", "You have logged in successfully!");
+        router.push("../../(dashboard)/dashboard");
+      })
+      .catch((error) => {
+        setIsLoading(false);
+        Alert.alert("Login Error", error?.message || String(error));
+      });
   };
 
   const handleForgotPassword = () => {
@@ -34,6 +48,11 @@ const Login: React.FC = () => {
 
   const handleBackToOnboarding = () => {
     router.back();
+  };
+
+  const clearFields = () => {
+    setEmail("");
+    setPassword("");
   };
 
   return (

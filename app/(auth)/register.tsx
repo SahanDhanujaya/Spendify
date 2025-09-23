@@ -1,18 +1,24 @@
+import { register } from "@/services/userService";
+import { User } from "@/types/user";
 import { useRouter } from "expo-router";
 import React, { useState } from "react";
 import {
-    Image,
-    ImageBackground,
-    KeyboardAvoidingView,
-    Platform,
-    SafeAreaView,
-    ScrollView,
-    StatusBar,
-    Text,
-    TextInput,
-    TouchableOpacity,
-    View,
+  ActivityIndicator,
+  Alert,
+  GestureResponderEvent,
+  Image,
+  ImageBackground,
+  KeyboardAvoidingView,
+  Platform,
+  SafeAreaView,
+  ScrollView,
+  StatusBar,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
 } from "react-native";
+
 
 const Register: React.FC = () => {
   const [fullName, setFullName] = useState("");
@@ -22,11 +28,30 @@ const Register: React.FC = () => {
   const [isPasswordVisible, setIsPasswordVisible] = useState(false);
   const [isConfirmPasswordVisible, setIsConfirmPasswordVisible] =
     useState(false);
+  const [isLoading, setIsLoading] = useState<boolean>(false);
   const router = useRouter();
 
-  const handleRegister = () => {
-    console.log("Register pressed");
-    // Handle registration logic here
+  const user: User = {
+    name: fullName,
+    email,
+    password,
+  };
+  const handleRegister = async (event: GestureResponderEvent) => {
+    setIsLoading(true);
+    try {
+      const result = await register(user);
+      if (result != null) {
+        setIsLoading(false);
+        Alert.alert("User Register Successfully!");
+      } else {
+        setIsLoading(false);
+        Alert.alert("User Register Unsuccessfully!");
+      }
+    } catch (err: any) {
+      setIsLoading(false);
+      clearFields();
+      Alert.alert("Registration Error", err?.message || String(err));
+    }
   };
 
   const handleSignIn = () => {
@@ -36,6 +61,13 @@ const Register: React.FC = () => {
 
   const handleBackToOnboarding = () => {
     router.back();
+  };
+
+  const clearFields = () => {
+    setFullName("");
+    setEmail("");
+    setPassword("");
+    setConfirmPassword("");
   };
 
   return (
@@ -189,13 +221,19 @@ const Register: React.FC = () => {
               </View>
 
               {/* Register Button */}
+
               <TouchableOpacity
                 className="bg-gray-800 rounded-2xl py-4 px-8 shadow-lg mb-6"
                 onPress={handleRegister}
+                disabled={isLoading}
               >
-                <Text className="text-white text-lg font-bold text-center">
-                  Create Account
-                </Text>
+                {isLoading ? (
+                  <ActivityIndicator color="#fff" />
+                ) : (
+                  <Text className="text-white text-lg font-bold text-center">
+                    Create Account
+                  </Text>
+                )}
               </TouchableOpacity>
 
               {/* Divider */}

@@ -1,6 +1,7 @@
 import { useRouter } from 'expo-router';
 import React, { useState } from 'react';
 import {
+  Alert,
   KeyboardAvoidingView,
   Platform,
   SafeAreaView,
@@ -10,7 +11,6 @@ import {
   TextInput,
   TouchableOpacity,
   View,
-  Alert,
 } from 'react-native';
 
 const EditProfile: React.FC = () => {
@@ -109,6 +109,10 @@ const EditProfile: React.FC = () => {
     const num = parseFloat(amount.replace(/[^0-9.-]+/g, ''));
     return isNaN(num) ? '' : num.toLocaleString();
   };
+
+  function handleChangePassword(): void {
+    router.push('/(profile)/changePassword')
+  }
 
   return (
     <SafeAreaView className="flex-1 bg-gray-50">
@@ -258,7 +262,9 @@ const EditProfile: React.FC = () => {
           <View className="bg-white rounded-2xl p-4 shadow-sm mb-8">
             <Text className="text-gray-800 font-bold text-lg mb-4">Account Actions</Text>
             
-            <TouchableOpacity className="bg-blue-100 rounded-xl p-4 mb-3">
+            <TouchableOpacity 
+            onPress={handleChangePassword}
+            className="bg-blue-100 rounded-xl p-4 mb-3">
               <View className="flex-row items-center">
                 <View className="bg-blue-500 rounded-full p-2 mr-3">
                   <Text className="text-lg">🔒</Text>

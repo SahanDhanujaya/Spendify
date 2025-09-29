@@ -1,13 +1,16 @@
-import React, { useState } from 'react';
+import { useAuth } from '@/context/AuthContext';
+import { getRecentTransactions } from '@/services/transactionService';
+import { Transactions } from '@/types/transaction';
+import React, { useEffect, useState } from 'react';
 import {
-    Dimensions,
-    Image,
-    SafeAreaView,
-    ScrollView,
-    StatusBar,
-    Text,
-    TouchableOpacity,
-    View,
+  Dimensions,
+  Image,
+  SafeAreaView,
+  ScrollView,
+  StatusBar,
+  Text,
+  TouchableOpacity,
+  View,
 } from 'react-native';
 
 const { width: screenWidth } = Dimensions.get('window');
@@ -21,6 +24,7 @@ const Dashboard: React.FC = () => {
   const monthlyExpenses = 3079.50;
   const savingsGoal = 2000.00;
   const currentSavings = 1340.50;
+  const [recentlyTransactions, setRecentlyTransactions] = useState<Transactions[]>([]);
 
   const recentTransactions = [
     { id: 1, title: 'Grocery Shopping', category: 'Food', amount: -85.50, date: 'Today', icon: '🛒', color: 'bg-red-100' },
@@ -38,7 +42,27 @@ const Dashboard: React.FC = () => {
   ];
 
   const periods = ['This Week', 'This Month', 'This Year'];
+  const auth = useAuth();
 
+  useEffect(()=> {
+    const result = getRecentTransactions();
+    result.then((res) => {
+      res.map((re)=> {
+        const tran: Transactions = {
+          id: re.id,
+          title: re.title,
+          category: re.category,
+          amount: re.type === "income" ? re.amount : -1 * re.amount,
+          date: re.date,
+          icon: re.type === "income" ? "💰" : "💸",
+          color: re.type === "income" ? "bg-green-100" : "bg-red-100",
+          type: re.type,
+          description: re.description
+        }
+        setRecentlyTransactions(prev => [...prev, tran]);
+      });
+    });
+  },[])
   const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat('en-US', {
       style: 'currency',
@@ -59,7 +83,7 @@ const Dashboard: React.FC = () => {
         <View className="flex-row justify-between items-center mb-4">
           <View>
             <Text className="text-2xl font-bold text-gray-800">Good Morning!</Text>
-            <Text className="text-gray-500 text-base">Here's your financial overview</Text>
+            <Text className="text-gray-500 text-base">{auth.user?.email}</Text>
           </View>
           <TouchableOpacity className="bg-white rounded-full p-3 shadow-sm">
             <Image
@@ -205,9 +229,9 @@ const Dashboard: React.FC = () => {
           </View>
           
           <View className="bg-white rounded-2xl shadow-sm">
-            {recentTransactions.map((transaction, index) => (
+            {recentlyTransactions.map((transaction, index) => (
               <TouchableOpacity 
-                key={transaction.id}
+                key={index}
                 className={`flex-row items-center p-4 ${
                   index !== recentTransactions.length - 1 ? 'border-b border-gray-100' : ''
                 }`}

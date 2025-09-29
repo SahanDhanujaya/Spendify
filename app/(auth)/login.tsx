@@ -2,6 +2,7 @@ import { login } from "@/services/userService";
 import { useRouter } from "expo-router";
 import React, { useState } from "react";
 import {
+  ActivityIndicator,
   Alert,
   Image,
   ImageBackground,
@@ -13,7 +14,7 @@ import {
   Text,
   TextInput,
   TouchableOpacity,
-  View
+  View,
 } from "react-native";
 
 const Login: React.FC = () => {
@@ -95,11 +96,10 @@ const Login: React.FC = () => {
 
             {/* Login Illustration Card */}
             <ImageBackground
-                source={require("../../assets/images/sign-page-abstract-concept-illustration_335657-3875.jpg")}
-                resizeMode="cover"
-                className="mb-12 w-full max-w-md h-96 rounded-3xl overflow-hidden"
-            >
-            </ImageBackground>
+              source={require("../../assets/images/sign-page-abstract-concept-illustration_335657-3875.jpg")}
+              resizeMode="cover"
+              className="mb-12 w-full max-w-md h-96 rounded-3xl overflow-hidden"
+            ></ImageBackground>
             {/* Form Container */}
             <View className="w-full max-w-md">
               {/* Email Input */}
@@ -161,9 +161,13 @@ const Login: React.FC = () => {
                 className="bg-gray-800 rounded-2xl py-4 px-8 shadow-lg mb-6"
                 onPress={handleLogin}
               >
-                <Text className="text-white text-lg font-bold text-center">
-                  Sign In
-                </Text>
+                {isLoading ? (
+                  <ActivityIndicator size="small" color="white" />
+                ) : (
+                  <Text className="text-white text-lg font-bold text-center">
+                    Sign In
+                  </Text>
+                )}
               </TouchableOpacity>
 
               {/* Divider */}
@@ -176,14 +180,14 @@ const Login: React.FC = () => {
               </View>
 
               {/* Social Login Buttons */}
-               
-                <TouchableOpacity className=" flex-row bg-gray-100 rounded-2xl py-4 px-6 justify-center items-center mb-8 shadow-sm">
-                 <Image
+
+              <TouchableOpacity className=" flex-row bg-gray-100 rounded-2xl py-4 px-6 justify-center items-center mb-8 shadow-sm">
+                <Image
                   source={require("../../assets/icons/icons8-google-48.png")}
                   style={{ width: 24, height: 24, marginRight: 8 }}
                 />
                 <Text className="text-gray-700 text-base font-semibold text-center">
-                Google
+                  Google
                 </Text>
               </TouchableOpacity>
 

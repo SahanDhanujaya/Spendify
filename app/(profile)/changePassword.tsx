@@ -1,6 +1,7 @@
 import { useRouter } from 'expo-router';
 import React, { useState } from 'react';
 import {
+  Alert,
   KeyboardAvoidingView,
   Platform,
   SafeAreaView,
@@ -10,7 +11,6 @@ import {
   TextInput,
   TouchableOpacity,
   View,
-  Alert,
 } from 'react-native';
 
 const ChangePassword: React.FC = () => {
@@ -166,7 +166,7 @@ const ChangePassword: React.FC = () => {
   const isFormValid = validatePasswords().isValid;
 
   return (
-    <SafeAreaView className="flex-1 bg-gray-50">
+    <SafeAreaView className="flex-1 bg-gray-50 p-8">
       <StatusBar barStyle="dark-content" backgroundColor="#F9FAFB" />
       
       <KeyboardAvoidingView 

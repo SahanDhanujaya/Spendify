@@ -1,35 +1,79 @@
-import React, { useState } from 'react';
+import { deleteTransaction, getRecentTransactions } from "@/services/transactionService";
+import { Transactions as TransactionType } from "@/types/transaction";
+import React, { useEffect, useState } from 'react';
 import {
-    SafeAreaView,
-    ScrollView,
-    StatusBar,
-    Text,
-    TextInput,
-    TouchableOpacity,
-    View,
+  Alert,
+  SafeAreaView,
+  ScrollView,
+  StatusBar,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
 } from 'react-native';
 
 const Transactions: React.FC = () => {
   const [selectedFilter, setSelectedFilter] = useState('All');
   const [selectedPeriod, setSelectedPeriod] = useState('This Month');
   const [searchQuery, setSearchQuery] = useState('');
-
-  // Sample transaction data
-  const allTransactions = [
-    { id: 1, title: 'Grocery Shopping', category: 'Food', amount: -85.50, date: 'Today', time: '2:30 PM', icon: '🛒', color: 'bg-orange-100', type: 'expense' },
-    { id: 2, title: 'Salary Deposit', category: 'Income', amount: 3500.00, date: 'Yesterday', time: '9:00 AM', icon: '💰', color: 'bg-green-100', type: 'income' },
-    { id: 3, title: 'Coffee Shop', category: 'Food', amount: -12.30, date: 'Yesterday', time: '8:15 AM', icon: '☕', color: 'bg-orange-100', type: 'expense' },
-    { id: 4, title: 'Gas Station', category: 'Transport', amount: -45.00, date: '2 days ago', time: '6:45 PM', icon: '⛽', color: 'bg-blue-100', type: 'expense' },
-    { id: 5, title: 'Netflix Subscription', category: 'Entertainment', amount: -15.99, date: '3 days ago', time: '12:00 PM', icon: '📺', color: 'bg-purple-100', type: 'expense' },
-    { id: 6, title: 'Freelance Payment', category: 'Income', amount: 750.00, date: '4 days ago', time: '3:20 PM', icon: '💻', color: 'bg-green-100', type: 'income' },
-    { id: 7, title: 'Restaurant Dinner', category: 'Food', amount: -68.90, date: '5 days ago', time: '7:30 PM', icon: '🍽️', color: 'bg-orange-100', type: 'expense' },
-    { id: 8, title: 'Uber Ride', category: 'Transport', amount: -18.50, date: '6 days ago', time: '10:15 AM', icon: '🚗', color: 'bg-blue-100', type: 'expense' },
-    { id: 9, title: 'Online Shopping', category: 'Shopping', amount: -125.99, date: '1 week ago', time: '2:45 PM', icon: '🛍️', color: 'bg-purple-100', type: 'expense' },
-    { id: 10, title: 'Electricity Bill', category: 'Bills', amount: -89.50, date: '1 week ago', time: '11:30 AM', icon: '💡', color: 'bg-yellow-100', type: 'expense' },
-  ];
+  const [selectedTransactionId, setSelectedTransactionId] = useState<string | null>(null);
+  const [allTransactions, setAllTransactions] = useState<TransactionType[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
 
   const filterOptions = ['All', 'Income', 'Expenses', 'Food', 'Transport', 'Bills', 'Shopping'];
   const periods = ['This Week', 'This Month', 'Last Month', 'This Year'];
+
+  useEffect(() => {
+    fetchTransactions();
+  }, []);
+
+  const fetchTransactions = async () => {
+    try {
+      setIsLoading(true);
+      const res = await getRecentTransactions();
+      console.log(res);
+      const transactions: TransactionType[] = res.map((re) => ({
+        id: re.id,
+        title: re.title,
+        category: re.category,
+        amount: re.type === "income" ? parseFloat(re.amount) : -1 * parseFloat(re.amount),
+        date: re.date,
+        icon: re.category === "food" ? "🍕" : 
+              re.category === "transport" ? "🚗" : 
+              re.category === "shopping" ? '🛍️' : 
+              re.category === 'bills' ? '💡' : 
+              re.category === 'health' ? '🏥' : 
+              re.category === 'fun' ? '🎮' : 
+              re.category === 'education' ? '📚' : 
+              re.category === 'salary' ? '💰' :
+              re.category === 'gift' ? '🎁' :
+              re.category === 'investment' ? '📈' :
+              re.category === 'freelance' ? '💻' :
+              re.category === 'service' ? '🛠️' : '📦',
+        color: re.category === "food" ? "bg-orange-500" : 
+               re.category === "transport" ? "bg-blue-500" : 
+               re.category === "shopping" ? 'bg-purple-500' : 
+               re.category === 'bills' ? 'bg-yellow-500' : 
+               re.category === 'health' ? 'bg-red-500' : 
+               re.category === 'fun' ? 'bg-pink-500' : 
+               re.category === 'education' ? 'bg-green-500' : 
+               re.category === 'salary' ? 'bg-green-500' :
+               re.category === 'gift' ? 'bg-gray-500' :
+               re.category === 'investment' ? 'bg-black' :
+               re.category === 'freelance' ? 'bg-gray-500' :
+               re.category === 'service' ? 'bg-gray-500' : 'bg-indigo-500',
+        type: re.type,
+        description: re.description,
+      }));
+
+      setAllTransactions(transactions);
+    } catch (error) {
+      console.error("Error fetching transactions:", error);
+      Alert.alert("Error", "Failed to load transactions. Please try again.");
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat('en-US', {
@@ -38,21 +82,69 @@ const Transactions: React.FC = () => {
     }).format(Math.abs(amount));
   };
 
+  const handleTransactionPress = (id: string) => {
+    if (selectedTransactionId === id) {
+      setSelectedTransactionId(null);
+    } else {
+      setSelectedTransactionId(id);
+    }
+  };
+
+  const handleEdit = (transaction: TransactionType) => {
+    Alert.alert(
+      'Edit Transaction',
+      `Edit: ${transaction.title}`,
+      [
+        { text: 'Cancel', style: 'cancel' },
+        { 
+          text: 'Edit', 
+          onPress: () => {
+            console.log('Edit transaction:', transaction);
+            setSelectedTransactionId(null);
+          }
+        }
+      ]
+    );
+  };
+
+  const handleDelete = async (id: string) => {
+    Alert.alert(
+      'Delete Transaction',
+      'Are you sure you want to delete this transaction?',
+      [
+        { text: 'Cancel', style: 'cancel' },
+        { 
+          text: 'Delete', 
+          style: 'destructive',
+          onPress: async () => {
+            try {
+              await deleteTransaction(id);
+              setAllTransactions(prev => prev.filter(t => t.id !== id));
+              setSelectedTransactionId(null);
+              Alert.alert('Success', 'Transaction deleted successfully');
+            } catch (error) {
+              console.error('Error deleting transaction:', error);
+              Alert.alert('Error', 'Failed to delete transaction');
+            }
+          }
+        }
+      ]
+    );
+};
+
   const getFilteredTransactions = () => {
     let filtered = allTransactions;
 
-    // Filter by category/type
     if (selectedFilter !== 'All') {
       if (selectedFilter === 'Income') {
         filtered = filtered.filter(t => t.type === 'income');
       } else if (selectedFilter === 'Expenses') {
         filtered = filtered.filter(t => t.type === 'expense');
       } else {
-        filtered = filtered.filter(t => t.category === selectedFilter);
+        filtered = filtered.filter(t => t.category.toLowerCase() === selectedFilter.toLowerCase());
       }
     }
 
-    // Filter by search query
     if (searchQuery.trim()) {
       filtered = filtered.filter(t => 
         t.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -66,8 +158,7 @@ const Transactions: React.FC = () => {
   const filteredTransactions = getFilteredTransactions();
 
   const getTotalAmount = () => {
-    const total = filteredTransactions.reduce((sum, transaction) => sum + transaction.amount, 0);
-    return total;
+    return filteredTransactions.reduce((sum, transaction) => sum + parseFloat(String(transaction.amount)), 0);
   };
 
   const getTransactionCount = () => {
@@ -79,9 +170,8 @@ const Transactions: React.FC = () => {
   const counts = getTransactionCount();
   const totalAmount = getTotalAmount();
 
-  // Group transactions by date
-  const groupTransactionsByDate = (transactions: typeof allTransactions) => {
-    const groups: { [key: string]: typeof allTransactions } = {};
+  const groupTransactionsByDate = (transactions: TransactionType[]) => {
+    const groups: { [key: string]: TransactionType[] } = {};
     
     transactions.forEach(transaction => {
       const date = transaction.date;
@@ -95,6 +185,14 @@ const Transactions: React.FC = () => {
   };
 
   const groupedTransactions = groupTransactionsByDate(filteredTransactions);
+
+  if (isLoading) {
+    return (
+      <SafeAreaView className="flex-1 bg-gray-50 items-center justify-center">
+        <Text className="text-gray-600 text-lg">Loading transactions...</Text>
+      </SafeAreaView>
+    );
+  }
 
   return (
     <SafeAreaView className="flex-1 bg-gray-50">
@@ -122,25 +220,23 @@ const Transactions: React.FC = () => {
       {/* Period Selector */}
       <View className="px-6 mb-4">
         <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-          <View className="flex-row space-x-3">
-            {periods.map((period) => (
-              <TouchableOpacity
-                key={period}
-                onPress={() => setSelectedPeriod(period)}
-                className={`px-4 py-2 rounded-full ${
-                  selectedPeriod === period ? 'bg-gray-800' : 'bg-white'
+          {periods.map((period) => (
+            <TouchableOpacity
+              key={period}
+              onPress={() => setSelectedPeriod(period)}
+              className={`px-4 py-2 rounded-full mr-3 ${
+                selectedPeriod === period ? 'bg-gray-800' : 'bg-white'
+              }`}
+            >
+              <Text
+                className={`font-semibold ${
+                  selectedPeriod === period ? 'text-white' : 'text-gray-600'
                 }`}
               >
-                <Text
-                  className={`font-semibold ${
-                    selectedPeriod === period ? 'text-white' : 'text-gray-600'
-                  }`}
-                >
-                  {period}
-                </Text>
-              </TouchableOpacity>
-            ))}
-          </View>
+                {period}
+              </Text>
+            </TouchableOpacity>
+          ))}
         </ScrollView>
       </View>
 
@@ -159,7 +255,7 @@ const Transactions: React.FC = () => {
               </View>
               <Text className="text-gray-600 text-sm">Income</Text>
               <Text className="text-green-600 font-bold text-lg">
-                +{formatCurrency(filteredTransactions.filter(t => t.type === 'income').reduce((sum, t) => sum + t.amount, 0))}
+                +{formatCurrency(filteredTransactions.filter(t => t.type === 'income').reduce((sum, t) => sum + parseFloat(String(t.amount)), 0))}
               </Text>
             </View>
             
@@ -169,7 +265,7 @@ const Transactions: React.FC = () => {
               </View>
               <Text className="text-gray-600 text-sm">Expenses</Text>
               <Text className="text-red-600 font-bold text-lg">
-                -{formatCurrency(Math.abs(filteredTransactions.filter(t => t.type === 'expense').reduce((sum, t) => sum + t.amount, 0)))}
+                -{formatCurrency(Math.abs(filteredTransactions.filter(t => t.type === 'expense').reduce((sum, t) => sum + parseFloat(String(t.amount)), 0)))}
               </Text>
             </View>
             
@@ -189,25 +285,23 @@ const Transactions: React.FC = () => {
       {/* Filter Options */}
       <View className="px-6 mb-4">
         <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-          <View className="flex-row space-x-3">
-            {filterOptions.map((filter) => (
-              <TouchableOpacity
-                key={filter}
-                onPress={() => setSelectedFilter(filter)}
-                className={`px-4 py-2 rounded-full ${
-                  selectedFilter === filter ? 'bg-gray-800' : 'bg-white'
+          {filterOptions.map((filter) => (
+            <TouchableOpacity
+              key={filter}
+              onPress={() => setSelectedFilter(filter)}
+              className={`px-4 py-2 rounded-full mr-3 ${
+                selectedFilter === filter ? 'bg-gray-800' : 'bg-white'
+              }`}
+            >
+              <Text
+                className={`font-semibold ${
+                  selectedFilter === filter ? 'text-white' : 'text-gray-600'
                 }`}
               >
-                <Text
-                  className={`font-semibold ${
-                    selectedFilter === filter ? 'text-white' : 'text-gray-600'
-                  }`}
-                >
-                  {filter}
-                </Text>
-              </TouchableOpacity>
-            ))}
-          </View>
+                {filter}
+              </Text>
+            </TouchableOpacity>
+          ))}
         </ScrollView>
       </View>
 
@@ -222,7 +316,7 @@ const Transactions: React.FC = () => {
             </Text>
           </View>
         ) : (
-          Object.entries(groupedTransactions).map(([date, transactions], groupIndex) => (
+          Object.entries(groupedTransactions).map(([date, transactions]) => (
             <View key={date} className="mb-6">
               <View className="flex-row justify-between items-center mb-3">
                 <Text className="text-gray-800 font-bold text-lg">{date}</Text>
@@ -231,38 +325,62 @@ const Transactions: React.FC = () => {
                 </Text>
               </View>
               
-              <View className="bg-white rounded-2xl shadow-sm">
+              <View className="bg-white rounded-2xl shadow-sm overflow-hidden">
                 {transactions.map((transaction, index) => (
-                  <TouchableOpacity
-                    key={transaction.id}
-                    className={`flex-row items-center p-4 ${
-                      index !== transactions.length - 1 ? 'border-b border-gray-100' : ''
-                    }`}
-                  >
-                    <View className={`${transaction.color} rounded-full p-3 mr-4`}>
-                      <Text className="text-lg">{transaction.icon}</Text>
-                    </View>
-                    
-                    <View className="flex-1">
-                      <Text className="text-gray-800 font-semibold text-base">
-                        {transaction.title}
-                      </Text>
-                      <Text className="text-gray-500 text-sm">
-                        {transaction.category} • {transaction.time}
-                      </Text>
-                    </View>
-                    
-                    <View className="items-end">
-                      <Text className={`font-bold text-base ${
-                        transaction.amount > 0 ? 'text-green-600' : 'text-red-600'
-                      }`}>
-                        {transaction.amount > 0 ? '+' : '-'}{formatCurrency(Math.abs(transaction.amount))}
-                      </Text>
-                      <Text className="text-gray-400 text-xs">
-                        {transaction.type}
-                      </Text>
-                    </View>
-                  </TouchableOpacity>
+                  <View key={transaction.id}>
+                    <TouchableOpacity
+                      onLongPress={() => handleTransactionPress(transaction.id || '')}
+                      delayLongPress={300}
+                      className={`flex-row items-center p-4 ${
+                        selectedTransactionId === transaction.id ? 'bg-gray-50' : 'bg-white'
+                      } ${index !== transactions.length - 1 ? 'border-b border-gray-100' : ''}`}
+                    >
+                      <View className={`${transaction.color} rounded-full p-3 mr-4`}>
+                        <Text className="text-lg">{transaction.icon}</Text>
+                      </View>
+                      
+                      <View className="flex-1">
+                        <Text className="text-gray-800 font-semibold text-base">
+                          {transaction.title}
+                        </Text>
+                        <Text className="text-gray-500 text-sm">
+                          {transaction.category} • {date}
+                        </Text>
+                      </View>
+                      
+                      <View className="items-end">
+                        <Text className={`font-bold text-base ${
+                          transaction.amount > 0 ? 'text-green-600' : 'text-red-600'
+                        }`}>
+                          {transaction.amount > 0 ? '+' : '-'}{formatCurrency(Math.abs(transaction.amount))}
+                        </Text>
+                        <Text className="text-gray-400 text-xs">
+                          {transaction.type}
+                        </Text>
+                      </View>
+                    </TouchableOpacity>
+
+                    {/* Action Buttons - Show when selected */}
+                    {selectedTransactionId === transaction.id && (
+                      <View className="flex-row bg-gray-50 px-4 py-3 border-t border-gray-200">
+                        <TouchableOpacity
+                          onPress={() => handleEdit(transaction)}
+                          className="flex-1 bg-blue-600 rounded-xl py-3 mr-2 flex-row items-center justify-center"
+                        >
+                          <Text className="text-xl mr-2">✏️</Text>
+                          <Text className="text-white font-semibold">Edit</Text>
+                        </TouchableOpacity>
+                        
+                        <TouchableOpacity
+                          onPress={() => handleDelete(transaction.id || '')}
+                          className="flex-1 bg-red-600 rounded-xl py-3 ml-2 flex-row items-center justify-center"
+                        >
+                          <Text className="text-xl mr-2">🗑️</Text>
+                          <Text className="text-white font-semibold">Delete</Text>
+                        </TouchableOpacity>
+                      </View>
+                    )}
+                  </View>
                 ))}
               </View>
             </View>

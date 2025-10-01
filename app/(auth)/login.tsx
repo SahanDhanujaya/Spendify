@@ -1,3 +1,4 @@
+import { useAuth } from "@/context/AuthContext";
 import { login } from "@/services/userService";
 import { useRouter } from "expo-router";
 import React, { useState } from "react";
@@ -23,6 +24,7 @@ const Login: React.FC = () => {
   const [isPasswordVisible, setIsPasswordVisible] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
+  const {user, } = useAuth();
 
   const handleLogin = () => {
     setIsLoading(true);

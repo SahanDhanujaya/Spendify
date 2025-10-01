@@ -1,6 +1,8 @@
+import { useAuth } from '@/context/AuthContext';
 import { useRouter } from 'expo-router';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
+  ActivityIndicator,
   Dimensions,
   SafeAreaView,
   ScrollView,
@@ -14,6 +16,14 @@ const { width: screenWidth } = Dimensions.get('window');
 const GetStarted: React.FC = () => {
   const [currentSlide, setCurrentSlide] = useState(0);
   const router = useRouter();
+  const { user, loading } = useAuth();
+
+  useEffect(() => {
+    if (!loading && user) {
+      router.replace('../(dashboard)/dashboard'); 
+    }
+  }, [user, loading]);
+
   const onboardingData = [
     {
       id: 1,
@@ -54,15 +64,24 @@ const GetStarted: React.FC = () => {
   };
 
   const handleGetStarted = () => {
-    // Navigate to dashboard or login screen
-   router.push('/(auth)/login');
+    // Navigate to login screen
+    router.push('/(auth)/login');
   };
 
   const handleSkip = () => {
-    // Skip onboarding and go to main app
+    // Skip to last slide
     setCurrentSlide(onboardingData.length - 1);
-   
   };
+
+  // Show loading indicator while checking auth
+  if (loading) {
+    return (
+      <SafeAreaView className="flex-1 bg-white items-center justify-center">
+        <ActivityIndicator size="large" color="#1F2937" />
+        <Text className="text-gray-600 mt-4 text-lg">Loading...</Text>
+      </SafeAreaView>
+    );
+  }
 
   const currentData = onboardingData[currentSlide];
 
@@ -70,7 +89,11 @@ const GetStarted: React.FC = () => {
     <SafeAreaView className="flex-1 bg-white">
       {/* Skip Button */}
       <View className={`flex-row justify-end px-6 pt-4 mt-4 ${currentSlide === onboardingData.length - 1 ? 'opacity-0' : ''}`}>
-        <TouchableOpacity onPress={handleSkip} className={`py-2 px-4 bg-gray-800 rounded-full ${currentSlide === onboardingData.length - 1 ? 'disabled' : ''}`}>
+        <TouchableOpacity 
+          onPress={handleSkip} 
+          className="py-2 px-4 bg-gray-800 rounded-full"
+          disabled={currentSlide === onboardingData.length - 1}
+        >
           <Text className="text-white font-semibold text-sm">Skip</Text>
         </TouchableOpacity>
       </View>
@@ -113,12 +136,12 @@ const GetStarted: React.FC = () => {
           {/* Page Indicators */}
           <View className="flex-row items-center mb-12">
             {onboardingData.map((_, index) => (
-              <View
+              <TouchableOpacity
                 key={index}
+                onPress={() => setCurrentSlide(index)}
                 className={`w-3 h-3 rounded-full mx-2 ${
                   index === currentSlide ? 'bg-blue-600' : 'bg-gray-300'
                 }`}
-                onTouchEnd={() => setCurrentSlide(index)}
               />
             ))}
           </View>
@@ -159,7 +182,6 @@ const GetStarted: React.FC = () => {
           </View>
         )}
       </View>
-
     </SafeAreaView>
   );
 };

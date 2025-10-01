@@ -98,7 +98,10 @@ const Dashboard: React.FC = () => {
   }
   useEffect(() => {
     clearData();
-    const fetchTransactions = async () => {
+    fetchTransactions();
+  }, []);
+
+  const fetchTransactions = async () => {
       try {
         const res = await getRecentTransactions();
         
@@ -166,9 +169,6 @@ const Dashboard: React.FC = () => {
       }
     };
 
-    fetchTransactions();
-  }, []);
-
   const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat("en-US", {
       style: "currency",
@@ -183,6 +183,10 @@ const Dashboard: React.FC = () => {
   const savingsPercentage = data.savingsGoal > 0 
     ? Math.min(Math.round((data.currentSavings / data.savingsGoal) * 100), 100)
     : 0;
+
+  function viewAll(): void {
+    fetchTransactions();
+  }
 
   return (
     <SafeAreaView className="flex-1 bg-gray-50 py-4">
@@ -302,7 +306,7 @@ const Dashboard: React.FC = () => {
         <View className="px-6 mb-6">
           <View className="flex-row justify-between items-center mb-4">
             <Text className="text-gray-800 font-bold text-xl">Categories</Text>
-            <TouchableOpacity>
+            <TouchableOpacity onPress={viewAll}>
               <Text className="text-blue-600 font-semibold">View All</Text>
             </TouchableOpacity>
           </View>

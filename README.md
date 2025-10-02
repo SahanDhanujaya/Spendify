@@ -36,6 +36,10 @@ Install my-project with npm
 
 https://youtu.be/GVUFKubECQo
 
+## Spendify Download Link📎
+
+<a href='https://expo.dev/accounts/dhan_jay/projects/spendify-v1/builds/c80add4d-8e01-4668-85f2-688c1b6d8f79'>📎Download Now</a>  
+
 
 ## Screenshots🖼
 

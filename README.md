@@ -39,7 +39,9 @@ https://youtu.be/GVUFKubECQo
 
 ## Screenshots🖼
 
-<img src= '/screenshots/Screenshot 2025-10-02 101257.png' alt = 'screenshot 01'>
-<img src= '/screenshots/Screenshot 2025-10-02 101740.png' alt = 'screenshot 02'>
-<img src= '/screenshots/Screenshot 2025-10-02 101844.png' alt = 'screenshot 03'>
+<div style = 'display: flex; align-items: center; justify-content: center; '>
+    <img src= '/screenshots/Screenshot 2025-10-02 102311.png' alt = 'screenshot 01'>
+    <img src= '/screenshots/Screenshot 2025-10-02 101740.png' alt = 'screenshot 02'>
+    <img src= '/screenshots/Screenshot 2025-10-02 101844.png' alt = 'screenshot 03'>
+</div>
 

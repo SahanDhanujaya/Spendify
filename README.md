@@ -42,6 +42,6 @@ https://youtu.be/GVUFKubECQo
 <div style = 'display: flex; align-items: center; justify-content: center; '>
     <img style = 'width: 200px;' src= '/screenshots/Screenshot 2025-10-02 102311.png' alt = 'screenshot 01'>
     <img style = 'width: 200px;' src= '/screenshots/Screenshot 2025-10-02 101740.png' alt = 'screenshot 02'>
-    <img style = 'width: 200px;' src= '/screenshots/Screenshot 2025-10-02 101844.png' alt = 'screenshot 03'>
+    <img style = 'width: 200px;' src= '/screenshots/Screenshot 2025-10-02 103355.png' alt = 'screenshot 03'>
 </div>
 

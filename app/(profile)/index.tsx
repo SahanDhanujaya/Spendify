@@ -1,5 +1,8 @@
+import { useAuth } from '@/context/AuthContext';
+import { getUsers, saveUser, updateUser } from '@/services/userService';
+import { User } from '@/types/user';
 import { useRouter } from 'expo-router';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   Alert,
   KeyboardAvoidingView,
@@ -15,22 +18,28 @@ import {
 
 const EditProfile: React.FC = () => {
   const router = useRouter();
-  
-  // Initial user data (would typically come from state management or API)
-  const [userData, setUserData] = useState({
-    fullName: 'John Doe',
-    email: 'john.doe@email.com',
-    phone: '+1 (555) 123-4567',
-    dateOfBirth: '1990-01-15',
-    address: '123 Main Street, City, State 12345',
-    occupation: 'Software Developer',
-    monthlyIncome: '8500',
+  const { user } = useAuth();
+
+  // Fixed: Changed from User[] to User
+  const [userData, setUserData] = useState<User>({
+    id: user?.id || '',
+    name: user?.name || '',
+    email: user?.email || '',
+    phone: user?.phone || undefined,
+    dob: user?.dob || '',
+    address: user?.address || '',
+    occupation: user?.occupation || '',
+    monthlyIncome: user?.monthlyIncome || undefined,
   });
 
   const [isLoading, setIsLoading] = useState(false);
   const [hasChanges, setHasChanges] = useState(false);
 
-  const handleInputChange = (field: keyof typeof userData, value: string) => {
+  useEffect(() => {
+    console.log('User:', user);
+  }, [user]);
+
+  const handleInputChange = (field: keyof User, value: string | number) => {
     setUserData(prev => ({
       ...prev,
       [field]: value
@@ -42,9 +51,26 @@ const EditProfile: React.FC = () => {
     setIsLoading(true);
     
     try {
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1500));
-      
+      // Check if user exists in database
+      const users = await getUsers();
+      const existingUser = users.find((u: any) => u.email === userData.email);
+
+      if (existingUser && existingUser.id) {
+        // User exists - update
+        await updateUser(existingUser.id, {
+          name: userData.name,
+          email: userData.email,
+          phone: userData.phone,
+          dob: userData.dob,
+          address: userData.address,
+          occupation: userData.occupation,
+          monthlyIncome: userData.monthlyIncome,
+        });
+      } else {
+        console.log('User does not exist in database');
+        await saveUser(userData);
+      }
+
       Alert.alert(
         'Profile Updated',
         'Your profile has been successfully updated.',
@@ -59,6 +85,7 @@ const EditProfile: React.FC = () => {
         ]
       );
     } catch (error) {
+      console.error('Error updating profile:', error);
       Alert.alert('Error', 'Failed to update profile. Please try again.');
     } finally {
       setIsLoading(false);
@@ -94,6 +121,7 @@ const EditProfile: React.FC = () => {
           text: 'Delete Account', 
           style: 'destructive',
           onPress: () => {
+            // TODO: Implement actual delete functionality
             Alert.alert(
               'Account Deleted',
               'Your account has been successfully deleted.',
@@ -105,13 +133,8 @@ const EditProfile: React.FC = () => {
     );
   };
 
-  const formatCurrency = (amount: string) => {
-    const num = parseFloat(amount.replace(/[^0-9.-]+/g, ''));
-    return isNaN(num) ? '' : num.toLocaleString();
-  };
-
   function handleChangePassword(): void {
-    router.push('/(profile)/changePassword')
+    router.push('/(profile)/changePassword');
   }
 
   return (
@@ -168,8 +191,8 @@ const EditProfile: React.FC = () => {
               <TextInput
                 className="bg-gray-100 rounded-xl px-4 py-3 text-base text-gray-800 font-medium"
                 placeholder="Enter your full name"
-                value={userData.fullName}
-                onChangeText={(value) => handleInputChange('fullName', value)}
+                value={userData.name}
+                onChangeText={(value) => handleInputChange('name', value)}
                 autoCapitalize="words"
               />
             </View>
@@ -193,8 +216,8 @@ const EditProfile: React.FC = () => {
               <TextInput
                 className="bg-gray-100 rounded-xl px-4 py-3 text-base text-gray-800 font-medium"
                 placeholder="Enter your phone number"
-                value={userData.phone}
-                onChangeText={(value) => handleInputChange('phone', value)}
+                value={userData.phone?.toString() || ''}
+                onChangeText={(value) => handleInputChange('phone', value ? parseInt(value.replace(/[^0-9]/g, '')) : undefined)}
                 keyboardType="phone-pad"
               />
             </View>
@@ -205,8 +228,8 @@ const EditProfile: React.FC = () => {
               <TextInput
                 className="bg-gray-100 rounded-xl px-4 py-3 text-base text-gray-800 font-medium"
                 placeholder="YYYY-MM-DD"
-                value={userData.dateOfBirth}
-                onChangeText={(value) => handleInputChange('dateOfBirth', value)}
+                value={userData.dob}
+                onChangeText={(value) => handleInputChange('dob', value)}
               />
             </View>
           </View>
@@ -251,8 +274,8 @@ const EditProfile: React.FC = () => {
               <TextInput
                 className="bg-gray-100 rounded-xl px-4 py-3 text-base text-gray-800 font-medium"
                 placeholder="Enter your monthly income"
-                value={userData.monthlyIncome}
-                onChangeText={(value) => handleInputChange('monthlyIncome', value.replace(/[^0-9]/g, ''))}
+                value={userData.monthlyIncome?.toString() || ''}
+                onChangeText={(value) => handleInputChange('monthlyIncome', value ? parseFloat(value.replace(/[^0-9]/g, '')) : undefined)}
                 keyboardType="numeric"
               />
             </View>
@@ -263,8 +286,9 @@ const EditProfile: React.FC = () => {
             <Text className="text-gray-800 font-bold text-lg mb-4">Account Actions</Text>
             
             <TouchableOpacity 
-            onPress={handleChangePassword}
-            className="bg-blue-100 rounded-xl p-4 mb-3">
+              onPress={handleChangePassword}
+              className="bg-blue-100 rounded-xl p-4 mb-3"
+            >
               <View className="flex-row items-center">
                 <View className="bg-blue-500 rounded-full p-2 mr-3">
                   <Text className="text-lg">🔒</Text>

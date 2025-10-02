@@ -1,5 +1,6 @@
+import { useAuth } from '@/context/AuthContext';
 import { useRouter } from 'expo-router';
-import React, { useState } from 'react';
+import React, { use, useState } from 'react';
 import {
     Alert,
     SafeAreaView,
@@ -16,13 +17,14 @@ const Profile: React.FC = () => {
   const [biometricEnabled, setBiometricEnabled] = useState(false);
   const [darkModeEnabled, setDarkModeEnabled] = useState(false);
   const router = useRouter();
-
+  const {user} = useAuth();
+ 
   // Sample user data
   const userData = {
-    name: 'John Doe',
-    email: 'john.doe@email.com',
-    joinDate: 'Member since Jan 2024',
-    avatar: '👤',
+    name: user?.name || user?.email.split('@')[0],
+    email: user?.email,
+    joinDate: `Member since at ${new Date().getFullYear()}`,
+    avatar: user?.avatar || '👤',
     totalTransactions: 156,
     categoriesUsed: 8,
     avgMonthlySpending: 2450.50
